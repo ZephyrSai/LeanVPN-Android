@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeanVPN for Android</title>
+<meta name="description" content="A tiny, unofficial Proton VPN client for Android with no screens: one Quick Settings tile that keeps you on the fastest server that isn't overloaded.">
+<meta property="og:title" content="LeanVPN for Android">
+<meta property="og:description" content="Proton VPN in one tap. A 3.4 MB Quick Settings tile that picks the best server and moves you when it fills up.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0b1210" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f8f6" media="(prefers-color-scheme: light)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 4 5v6c0 5.1 3.4 9.5 8 11 4.6-1.5 8-5.9 8-11V5z' fill='%2312a26f'/%3E%3Cpath d='m8.3 12 2.6 2.6 4.8-5.1' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #f7f8f6;
+  --bg-2: #eef1ed;
+  --fg: #121614;
+  --muted: #59625d;
+  --line: #dfe4df;
+  --card: #ffffff;
+  --accent: #0f9465;
+  --accent-2: #0b7a53;
+  --accent-soft: #e2f4ec;
+  --warn: #b45309;
+  --code-bg: #f0f2ef;
+  --menu-bg: rgba(250, 250, 250, .88);
+  --menu-fg: #1d1d1f;
+  --menu-muted: #8a8a8e;
+  --menu-hi: #2f6fed;
+  --bar-bg: rgba(255, 255, 255, .55);
+  --desk-a: #c9e7da;
+  --desk-b: #e9d9c3;
+  --shadow: 0 1px 2px rgba(16, 24, 20, .06), 0 8px 24px rgba(16, 24, 20, .06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1210;
+    --bg-2: #101a17;
+    --fg: #e8eeea;
+    --muted: #9aa8a1;
+    --line: #22302b;
+    --card: #121c19;
+    --accent: #34d399;
+    --accent-2: #6ee7b7;
+    --accent-soft: #11291f;
+    --warn: #fbbf24;
+    --code-bg: #0f1815;
+    --menu-bg: rgba(40, 40, 42, .88);
+    --menu-fg: #f2f2f7;
+    --menu-muted: #8e8e93;
+    --menu-hi: #2f6fed;
+    --bar-bg: rgba(20, 20, 22, .55);
+    --desk-a: #13362a;
+    --desk-b: #2b2236;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1210;
+  --bg-2: #101a17;
+  --fg: #e8eeea;
+  --muted: #9aa8a1;
+  --line: #22302b;
+  --card: #121c19;
+  --accent: #34d399;
+  --accent-2: #6ee7b7;
+  --accent-soft: #11291f;
+  --warn: #fbbf24;
+  --code-bg: #0f1815;
+  --menu-bg: rgba(40, 40, 42, .88);
+  --menu-fg: #f2f2f7;
+  --menu-muted: #8e8e93;
+  --menu-hi: #2f6fed;
+  --bar-bg: rgba(20, 20, 22, .55);
+  --desk-a: #13362a;
+  --desk-b: #2b2236;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: var(--accent-2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, pre, kbd { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .9em; }
+:not(pre) > code { background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px; padding: .08em .35em; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 720px) { .wrap { padding: 0 28px; } }
+
+/* Header */
+header.top {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: saturate(1.6) blur(14px);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; gap: 16px; height: 56px; }
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 650; letter-spacing: -.01em; color: var(--fg); font-size: 17px; }
+.brand:hover { text-decoration: none; }
+.brand svg { width: 22px; height: 22px; }
+.top nav { display: flex; gap: 22px; margin-left: auto; font-size: 14.5px; }
+.top nav a { color: var(--muted); }
+.top nav a:hover { color: var(--fg); text-decoration: none; }
+.icon-btn {
+  display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 9px;
+  border: 1px solid var(--line); background: var(--card); color: var(--fg); cursor: pointer;
+}
+.icon-btn svg { width: 17px; height: 17px; }
+.gh { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 14px; font-weight: 550; }
+.gh:hover { text-decoration: none; border-color: var(--muted); }
+.gh svg { width: 16px; height: 16px; }
+@media (max-width: 719px) { .top nav { display: none; } .top .actions { margin-left: auto; } }
+.actions { display: flex; gap: 8px; }
+
+/* Hero */
+.hero { padding: 56px 0 40px; }
+.hero-grid { display: grid; gap: 40px; align-items: center; }
+.hero-grid > *, .grid > *, .score > * { min-width: 0; }
+@media (min-width: 920px) { .hero-grid { grid-template-columns: 1.05fr 1fr; gap: 48px; } .hero { padding: 80px 0 56px; } }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted);
+  border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 12px 4px 6px;
+}
+.pill b { background: var(--accent-soft); color: var(--accent-2); border-radius: 999px; padding: 1px 8px; font-weight: 600; font-size: 12px; }
+h1, h2 { text-wrap: balance; }
+h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.05; letter-spacing: -.035em; margin: 18px 0 18px; font-weight: 750; }
+h1 em { font-style: normal; color: var(--accent); }
+.lede { font-size: clamp(17px, 2.2vw, 19.5px); color: var(--muted); max-width: 34em; margin: 0 0 28px; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 20px; border-radius: 12px;
+  font-weight: 600; font-size: 15.5px; border: 1px solid transparent;
+}
+.btn:hover { text-decoration: none; }
+.btn.primary { background: var(--accent); color: #fff; }
+:root[data-theme="dark"] .btn.primary { color: #062118; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #062118; } }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.ghost { border-color: var(--line); background: var(--card); color: var(--fg); }
+.btn.ghost:hover { border-color: var(--muted); }
+.btn svg { width: 17px; height: 17px; }
+.fine { margin-top: 18px; font-size: 13.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.fine span::before { content: "✓"; margin-right: 6px; color: var(--accent); font-weight: 700; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin: 8px 0 0; }
+@media (min-width: 820px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+.stat { background: var(--card); padding: 20px 20px 18px; }
+.stat .num { font-size: clamp(26px, 4vw, 34px); font-weight: 720; letter-spacing: -.03em; line-height: 1.1; }
+.stat .num small { font-size: .5em; font-weight: 600; color: var(--muted); letter-spacing: 0; margin-left: 2px; }
+.stat .lbl { color: var(--muted); font-size: 14px; margin-top: 6px; }
+.stat .vs { font-size: 12.5px; color: var(--muted); margin-top: 2px; opacity: .85; }
+
+/* Sections */
+section { padding: 64px 0 8px; }
+.eyebrow { font-size: 13px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-2); margin: 0 0 10px; }
+h2 { font-size: clamp(26px, 4vw, 38px); letter-spacing: -.03em; line-height: 1.12; margin: 0 0 14px; font-weight: 720; }
+.sub { color: var(--muted); font-size: 17px; max-width: 40em; margin: 0 0 32px; }
+.grid { display: grid; gap: 16px; }
+@media (min-width: 760px) { .grid.three { grid-template-columns: repeat(3, 1fr); } .grid.two { grid-template-columns: repeat(2, 1fr); } }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+.card h3 { margin: 10px 0 6px; font-size: 18px; letter-spacing: -.01em; }
+.card p { margin: 0; color: var(--muted); font-size: 15px; }
+.step { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--accent-soft); color: var(--accent-2); font-weight: 700; font-size: 14px; }
+.ico { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-2); }
+.ico svg { width: 19px; height: 19px; }
+
+/* Score example */
+.score { margin-top: 16px; display: grid; gap: 16px; }
+@media (min-width: 760px) { .score { grid-template-columns: 1.1fr 1fr; align-items: stretch; } }
+.formula { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: clamp(15px, 2.2vw, 18px); white-space: nowrap; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; overflow-x: auto; }
+.formula .k { color: var(--accent-2); font-weight: 650; }
+.vs-table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.vs-table th, .vs-table td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+.vs-table th { color: var(--muted); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; }
+.vs-table td.n { font-variant-numeric: tabular-nums; }
+.vs-table tr.win td { color: var(--accent-2); font-weight: 650; }
+.meter { height: 6px; border-radius: 99px; background: var(--bg-2); overflow: hidden; min-width: 60px; }
+.meter i { display: block; height: 100%; border-radius: 99px; background: var(--accent); }
+.meter i.hot { background: var(--warn); }
+.lab { display: flex; align-items: center; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
+.lab label { font-size: 14px; color: var(--muted); }
+.lab input[type="range"] { flex: 1; min-width: 160px; accent-color: var(--accent); }
+.lab output { font-variant-numeric: tabular-nums; font-weight: 650; min-width: 3.5em; }
+
+/* Lists */
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.checks li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 14px; align-items: start; }
+.checks b { display: block; font-size: 16px; margin-bottom: 2px; }
+.checks span { color: var(--muted); font-size: 15px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips span { border: 1px dashed var(--line); color: var(--muted); border-radius: 999px; padding: 5px 12px; font-size: 14px; text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 55%, transparent); }
+
+/* Install */
+.steps { counter-reset: s; display: grid; gap: 18px; }
+.inst { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 14px; }
+.inst .step { margin-top: 2px; }
+.inst h3 { margin: 2px 0 6px; font-size: 17px; }
+.inst p { margin: 0 0 10px; color: var(--muted); font-size: 15px; }
+pre.cmd {
+  position: relative; margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 56px 14px 16px; overflow-x: auto; line-height: 1.7; font-size: 14px;
+}
+pre.cmd .p { color: var(--muted); user-select: none; }
+.copy {
+  position: absolute; top: 8px; right: 8px; height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--card); color: var(--muted); font: 600 12.5px/1 -apple-system, BlinkMacSystemFont, sans-serif; cursor: pointer;
+}
+.copy:hover { color: var(--fg); }
+.note { border-left: 3px solid var(--warn); background: color-mix(in srgb, var(--warn) 8%, var(--card)); padding: 12px 16px; border-radius: 0 10px 10px 0; color: var(--fg); font-size: 15px; margin-top: 4px; }
+
+/* FAQ */
+details { border-bottom: 1px solid var(--line); padding: 4px 0; }
+details:first-of-type { border-top: 1px solid var(--line); }
+summary { cursor: pointer; list-style: none; padding: 14px 32px 14px 0; font-weight: 600; font-size: 16.5px; position: relative; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; position: absolute; right: 4px; top: 10px; font-size: 22px; font-weight: 400; color: var(--muted); transition: transform .2s; }
+details[open] summary::after { transform: rotate(45deg); }
+details p { margin: 0 0 16px; color: var(--muted); max-width: 46em; }
+
+/* Status / footer */
+.status-card { display: grid; gap: 18px; }
+@media (min-width: 760px) { .status-card { grid-template-columns: 1fr 1fr; } }
+.status-card ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 15px; }
+.status-card li { margin: 4px 0; }
+.status-card h3 { display: flex; align-items: center; gap: 8px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); display: inline-block; }
+.dot.amber { background: var(--warn); }
+footer { margin-top: 72px; border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
+footer .row { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-bottom: 14px; }
+footer p { margin: 0 0 8px; max-width: 60em; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
+
+/* Phone mock: Android Quick Settings */
+:root { --qs-bg: #e7eee9; --qs-tile: #d4dfd8; --qs-fg: #16201a; --qs-on: #0f9465; --qs-on-fg: #ffffff; --qs-mark: #0f9465; --qs-frame: #1a1d1c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --qs-bg: #121916; --qs-tile: #222c28; --qs-fg: #e5ede8; --qs-on: #34d399; --qs-on-fg: #062118; --qs-mark: #34d399; --qs-frame: #000000; } }
+:root[data-theme="dark"] { --qs-bg: #121916; --qs-tile: #222c28; --qs-fg: #e5ede8; --qs-on: #34d399; --qs-on-fg: #062118; --qs-mark: #34d399; --qs-frame: #000000; }
+.plat { font-weight: 500; color: var(--muted); font-size: 14px; margin-left: 2px; }
+.phone { width: min(340px, 100%); margin: 0 auto; padding: 9px; border-radius: 40px; background: var(--qs-frame); box-shadow: var(--shadow); }
+.screen { border-radius: 32px; background: var(--qs-bg); color: var(--qs-fg); padding: 14px 14px 18px; font: 500 13px/1.25 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.sb { display: flex; justify-content: space-between; align-items: center; padding: 2px 10px 12px; font-size: 13px; font-weight: 600; }
+.sbi { display: flex; gap: 6px; align-items: center; }
+.sbi svg { width: 15px; height: 15px; display: block; }
+#sb-key { transition: opacity .3s; }
+.bright { position: relative; height: 38px; border-radius: 19px; background: var(--qs-tile); margin: 2px 0 12px; overflow: hidden; }
+.bright i { position: absolute; inset: 0 38% 0 0; border-radius: 19px; background: color-mix(in srgb, var(--qs-on) 55%, var(--qs-tile)); }
+.bright svg { position: absolute; left: 12px; top: 9px; width: 20px; height: 20px; color: var(--qs-on-fg); }
+.tiles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.t { display: flex; align-items: center; gap: 10px; height: 66px; padding: 0 12px 0 14px; border-radius: 24px; background: var(--qs-tile); min-width: 0; transition: background .35s, color .35s; }
+.t svg { width: 22px; height: 22px; flex: none; }
+.t .tx { min-width: 0; }
+.t b { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t span { display: block; font-size: 12px; opacity: .78; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t.on { background: var(--qs-on); color: var(--qs-on-fg); }
+.t.lean { grid-column: span 2; height: 72px; box-shadow: 0 0 0 2px color-mix(in srgb, var(--qs-on) 45%, transparent), 0 6px 18px color-mix(in srgb, var(--qs-on) 30%, transparent); }
+.t.lean:not(.on) #lean-mark { stroke: var(--qs-tile); }
+.t.lean.on #lean-mark { stroke: var(--qs-on); }
+.dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--qs-fg); opacity: .25; }
+.dots i:first-child { opacity: .7; }
+.caption { font-size: 13px; color: var(--muted); margin-top: 14px; text-align: center; min-height: 2.6em; }
+details.build { margin-top: 22px; border: 1px solid var(--line); border-radius: 14px; padding: 4px 18px; background: var(--card); }
+details.build summary { font-size: 16px; }
+details.build p { margin: 0 0 12px; color: var(--muted); }
+details.build pre { margin-bottom: 16px; }
+@media (max-width: 400px) { .t { padding: 0 8px 0 10px; gap: 8px; } .t b { font-size: 13px; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="LeanVPN for Android home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5.1 3.4 9.5 8 11 4.6-1.5 8-5.9 8-11V5z" fill="var(--accent)"/><path d="m8.3 12 2.6 2.6 4.8-5.1" fill="none" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      LeanVPN <span class="plat">Android</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#install">Install</a>
+      <a href="#status">Status</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="actions">
+      <button class="icon-btn" id="theme" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>
+      </button>
+      <a class="gh" href="https://github.com/ZephyrSai/LeanVPN-Android">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap">
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <span class="pill"><b>Alpha</b> Unofficial client for Proton VPN · Android</span>
+          <h1>Proton VPN in one tap. <em>No app to open.</em></h1>
+          <p class="lede">LeanVPN for Android has no screens: it's a Quick Settings tile. It puts you on the fastest server that isn't overloaded, and quietly moves you when it fills up or stops answering. The whole thing is 3.4 MB.</p>
+          <div class="cta">
+            <a class="btn primary" href="https://github.com/ZephyrSai/LeanVPN-Android/releases/latest">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+              Download APK
+            </a>
+            <a class="btn ghost" href="#install">How to install</a>
+          </div>
+          <div class="fine"><span>Free &amp; open source (GPL-3.0)</span><span>Android 10+</span><span>Works with Proton Free</span></div>
+        </div>
+
+        <div>
+          <div class="phone" role="img" aria-label="An Android Quick Settings panel with the LeanVPN tile switched on, showing the connected server and its load.">
+            <div class="screen">
+              <div class="sb"><span id="clock">9:41</span><span class="sbi">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v5c0 4.5 3 8.4 8 10 5-1.6 8-5.5 8-10V6z" fill="currentColor" id="sb-key"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20h3v-4H2zm5 0h3v-8H7zm5 0h3V8h-3zm5 0h3V4h-3z" fill="currentColor"/></svg>
+                <svg viewBox="0 0 28 16" aria-hidden="true" style="width:20px"><rect x="1" y="3" width="22" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="5" width="15" height="6" rx="1.5" fill="currentColor"/><path d="M25 6.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </span></div>
+              <div class="bright" aria-hidden="true"><i></i>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+              </div>
+              <div class="tiles" aria-hidden="true">
+                <div class="t on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 16a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.2" r="1.2" fill="currentColor" stroke="none"/></svg><div class="tx"><b>Internet</b><span>Home Wi-Fi</span></div></div>
+                <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg><div class="tx"><b>Bluetooth</b><span>Off</span></div></div>
+                
+                <div class="t lean on" id="lean"><svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.1 3.4 9.5 8 11 4.6-1.5 8-5.9 8-11V5z" fill="currentColor"/><path d="m8.3 12 2.6 2.6 4.8-5.1" fill="none" stroke="var(--qs-mark)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" id="lean-mark"/></svg><div class="tx"><b>LeanVPN</b><span id="lean-sub">NL-FREE#93 · 54%</span></div></div>
+                <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l-2 6v12a2 2 0 0 1-4 0V8z"/></svg><div class="tx"><b>Flashlight</b><span>Off</span></div></div>
+                <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8" stroke-linecap="round"/></svg><div class="tx"><b>Do Not Disturb</b><span>Off</span></div></div>
+                
+              </div>
+              <div class="dots" aria-hidden="true"><i></i><i></i></div>
+            </div>
+          </div>
+          <p class="caption" id="cap">Connected. The second line shows the server and its load.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats" aria-label="Footprint">
+      <div class="stat"><div class="num">3.4<small>MB</small></div><div class="lbl">the whole app</div><div class="vs">installed size, nothing extracted</div></div>
+      <div class="stat"><div class="num">64<small>KB</small></div><div class="lbl">of app code</div><div class="vs">the rest is the WireGuard engine</div></div>
+      <div class="stat"><div class="num">2</div><div class="lbl">permissions</div><div class="vs">internet and network state</div></div>
+      <div class="stat"><div class="num">0</div><div class="lbl">screens</div><div class="vs">just the tile</div></div>
+    </div>
+
+    <section id="why">
+      <p class="eyebrow">The problem</p>
+      <h2>Free servers fill up. Your connection shouldn't drop because of it.</h2>
+      <p class="sub">A busy server means a stalling connection and a trip into the app to pick another one, again and again. LeanVPN does that job for you: it measures, picks, keeps watching, and switches before you notice. Everything else is gone, including the app itself.</p>
+    </section>
+
+    <section id="how">
+      <p class="eyebrow">How it picks</p>
+      <h2>The nearest server isn't always the best one.</h2>
+      <p class="sub">Every connect takes about a third of a second, measured over your real connection, never through the tunnel.</p>
+      <div class="grid three">
+        <div class="card"><span class="step">1</span><h3>Shortlist</h3><p>The 10 best servers by Proton's own score (distance and load from where you are), plus the 6 least-loaded of the 60 nearest. Your plan only; no Secure Core, Tor or maintenance.</p></div>
+        <div class="card"><span class="step">2</span><h3>Measure</h3><p>Real latency to every candidate at the same time, with a TCP connect over your normal connection. No guesses from a map.</p></div>
+        <div class="card"><span class="step">3</span><h3>Score &amp; verify</h3><p>Lowest score wins. Then it needs a real answer from Proton's in-tunnel DNS, because overloaded servers often complete a handshake and then carry nothing.</p></div>
+      </div>
+
+      <div class="score">
+        <div class="card">
+          <div class="formula"><span class="k">score</span> = latency_ms + 300 × load²</div>
+          <p style="margin-top:14px">With load from 0 to 1, it barely matters while it's low and takes over as a server nears saturation. Try it: drag the nearby server's load.</p>
+          <div class="lab">
+            <label for="load">Nearby server load</label>
+            <input id="load" type="range" min="10" max="100" value="90">
+            <output id="load-out" for="load">90%</output>
+          </div>
+        </div>
+        <div class="card" style="overflow-x:auto">
+          <table class="vs-table" aria-live="polite">
+            <thead><tr><th>Server</th><th>Latency</th><th>Load</th><th>Score</th></tr></thead>
+            <tbody>
+              <tr id="row-a"><td>Nearby</td><td class="n">40 ms</td><td><div class="meter"><i id="bar-a" class="hot" style="width:90%"></i></div></td><td class="n" id="score-a">283</td></tr>
+              <tr id="row-b" class="win"><td>Farther</td><td class="n">90 ms</td><td><div class="meter"><i style="width:30%"></i></div></td><td class="n" id="score-b">117</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:14px;font-size:14px;color:var(--muted)" id="verdict">LeanVPN picks <b style="color:var(--accent-2)">Farther</b>. It's 50 ms slower on paper, but it won't buckle.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="stay">
+      <p class="eyebrow">Once connected</p>
+      <h2>It keeps checking, so you don't have to.</h2>
+      <p class="sub">Every 10 seconds, while the phone is awake, it reads two counters from WireGuard. It costs nothing until something looks wrong, and it never wakes the phone up.</p>
+      <div class="grid two">
+        <ul class="checks">
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span><div><b>Stall detection</b><span>Sending but nothing coming back for 20 s, or no handshake for 200 s, triggers a check through the tunnel. No answer and it moves to the next-best server, avoiding the dead one for 30 minutes.</span></div></li>
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><div><b>Load watch</b><span>Every 15 minutes it refreshes loads. At 85% or more, if a server at least 20 points lighter exists, it moves. A server going into maintenance is left right away.</span></div></li>
+        </ul>
+        <ul class="checks">
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></span><div><b>Wi-Fi ↔ mobile data</b><span>WireGuard roams between networks by itself; if traffic stalls anyway, the checks catch it. A failed attempt retries the moment a network comes back.</span></div></li>
+          <li><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5.1 3.4 9.5 8 11 4.6-1.5 8-5.9 8-11V5z"/><path d="M9 12h6"/></svg></span><div><b>Kill switch, Android's way</b><span>Turn on Always-on VPN and "Block connections without VPN" for LeanVPN in Settings. Android then keeps it running from boot and blocks anything outside the tunnel.</span></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="install">
+      <p class="eyebrow">Install</p>
+      <h2>Four taps and a code.</h2>
+      <p class="sub">You need Android 10 or later on a 64-bit phone, and a Proton account. Free works.</p>
+      <div class="steps">
+        <div class="inst"><span class="step">1</span><div>
+          <h3>Download and install the APK</h3>
+          <p>Get <code>LeanVPN-&lt;version&gt;.apk</code> from <a href="https://github.com/ZephyrSai/LeanVPN-Android/releases/latest">GitHub Releases</a> and open it. Allow installs from your browser when Android asks; if Play Protect warns about an unknown developer, choose <b>Install anyway</b>.</p>
+        </div></div>
+        <div class="inst"><span class="step">2</span><div>
+          <h3>Open it once, add the tile</h3>
+          <p>Android asks <i>"Add LeanVPN tile to Quick Settings?"</i>; tap <b>Add tile</b>. That's the only time you'll open the app.</p>
+        </div></div>
+        <div class="inst"><span class="step">3</span><div>
+          <h3>Allow the VPN</h3>
+          <p>Android's own prompt, once: <i>"LeanVPN wants to set up a VPN connection"</i>. Tap <b>OK</b>.</p>
+        </div></div>
+        <div class="inst"><span class="step">4</span><div>
+          <h3>Sign in with a code</h3>
+          <p>Your browser opens <code>account.protonvpn.com/appletv</code> with an 8-character code already copied. Sign in to Proton, paste it and approve, then pull down Quick Settings: the tile shows your server. Your password never touches LeanVPN.</p>
+          <p class="note">If the page doesn't load on your network, switch to mobile data for a moment, or open it on any other device and type the code shown on the tile.</p>
+        </div></div>
+      </div>
+      <details class="build">
+        <summary>Build it yourself instead</summary>
+        <p>No Android Studio or Gradle: a Makefile drives the SDK tools directly. It takes about a minute.</p>
+        <pre class="cmd"><code><span class="p">$ </span>brew install openjdk@21 &amp;&amp; brew install --cask android-commandlinetools
+<span class="p">$ </span>sdkmanager --sdk_root="$HOME/Library/Android/sdk" "platforms;android-35" "build-tools;35.0.0" "platform-tools"
+<span class="p">$ </span>git clone https://github.com/ZephyrSai/LeanVPN-Android.git
+<span class="p">$ </span>cd LeanVPN-Android &amp;&amp; make install</code><button class="copy" type="button">Copy</button></pre>
+      </details>
+      <p style="margin-top:22px;color:var(--muted);font-size:15px">Long-press the tile any time for Switch server and Sign out. The <a href="https://github.com/ZephyrSai/LeanVPN-Android#readme">full guide</a> covers troubleshooting, battery settings on OnePlus, Xiaomi and Samsung phones, and logs.</p>
+    </section>
+
+    <section id="missing">
+      <p class="eyebrow">Deliberately missing</p>
+      <h2>Everything else.</h2>
+      <p class="sub">Small is the feature. If you need any of these, the official app is excellent.</p>
+      <div class="chips"><span>Screens</span><span>Settings</span><span>Country picker</span><span>Secure Core</span><span>NetShield</span><span>Split tunneling</span><span>Port forwarding</span><span>Notifications</span><span>Widgets</span><span>Google services</span><span>Analytics</span><span>Auto-update</span></div>
+    </section>
+
+    <section id="status">
+      <p class="eyebrow">Honest status</p>
+      <h2>Alpha: tested on one phone.</h2>
+      <p class="sub">The server choice and failover logic is the same as in the Mac version, which is in daily use. The Android side is new. Please report anything odd, with logs.</p>
+      <div class="card status-card">
+        <div>
+          <h3><span class="dot"></span>Verified</h3>
+          <ul>
+            <li>Install, adding the tile, the VPN permission</li>
+            <li>Code sign-in and connecting automatically afterwards</li>
+            <li>Keys byte-for-byte identical to the Mac version's</li>
+            <li>Live HTTPS to Proton through a network that blocks it</li>
+          </ul>
+        </div>
+        <div>
+          <h3><span class="dot amber"></span>Needs more testing</h3>
+          <ul>
+            <li>Failover between servers on a phone, multi-day sessions</li>
+            <li>Wi-Fi ↔ mobile data while connected, Always-on at boot</li>
+            <li>Battery use, other phone makers, Android 10–15</li>
+            <li>Paid plans</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <p class="eyebrow">FAQ</p>
+      <h2>Questions</h2>
+      <details><summary>Is this an official Proton app?</summary><p>No. LeanVPN is an independent, unofficial project, not made or endorsed by Proton AG. It uses Proton's API the way Proton's own apps do. "Proton" and "Proton VPN" are trademarks of Proton AG.</p></details>
+      <details><summary>Where's the app?</summary><p>There isn't one to look at. Opening LeanVPN only offers to add its tile; after that, everything happens from Quick Settings. Long-press the tile for a small menu with Switch server and Sign out.</p></details>
+      <details><summary>Does it work with a free Proton account?</summary><p>Yes, that's what it was built on. With a free plan it chooses among Proton's free servers; with a paid plan it can use any non-Secure-Core server.</p></details>
+      <details><summary>Why does it sign in as the Apple TV app?</summary><p>LeanVPN uses Proton's "enter a code on the web" sign-in so it never handles your password. Proton's code page only approves codes for its Apple TV app, so LeanVPN uses that app's identifier when signing in. Proton could change or block this at any time, and using an unofficial client may be against Proton's terms.</p></details>
+      <details><summary>Where is my sign-in stored?</summary><p>In the app's private storage, which other apps can't read, with backups switched off. LeanVPN talks only to <code>vpn-api.proton.me</code> and the VPN servers: no analytics, crash reporting, ads or Google services.</p></details>
+      <details><summary>Does it drain the battery?</summary><p>When it's off, it does nothing at all. When it's on, the health check runs every 10 seconds only while the phone is awake and never wakes it, and WireGuard's keepalive is Proton's 60 seconds. On phones with aggressive battery savers (some OnePlus, Xiaomi and Samsung models), set LeanVPN's battery use to Unrestricted if it disconnects.</p></details>
+      <details><summary>Is there a kill switch?</summary><p>Use Android's: Settings → Network → VPN → LeanVPN → Always-on VPN plus "Block connections without VPN". Nothing leaves the phone outside the tunnel, even while LeanVPN switches servers.</p></details>
+      <details><summary>What about IPv6?</summary><p>On servers that support it, IPv6 goes through the tunnel. On the others it's routed into the tunnel and dropped, so nothing leaks around it.</p></details>
+      <details><summary>Is it on Google Play or F-Droid?</summary><p>Not yet. Install the APK from GitHub Releases, or build it yourself from source.</p></details>
+      <details><summary>Is there a Mac version?</summary><p>Yes: <a href="https://zephyrsai.github.io/LeanVPN/">LeanVPN for macOS</a> lives in the menu bar and works the same way.</p></details>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <a href="https://github.com/ZephyrSai/LeanVPN-Android">GitHub</a>
+      <a href="https://github.com/ZephyrSai/LeanVPN-Android#readme">Guide</a>
+      <a href="https://github.com/ZephyrSai/LeanVPN-Android/releases">Releases</a>
+      <a href="https://github.com/ZephyrSai/LeanVPN-Android/issues">Report a bug</a>
+      <a href="https://zephyrsai.github.io/LeanVPN/">Mac version</a>
+      <a href="https://github.com/ZephyrSai/LeanVPN-Android/blob/main/LICENSE">License (GPL-3.0)</a>
+    </div>
+    <p>LeanVPN is provided as is, without warranty. It is not affiliated with, endorsed by or supported by Proton AG. "Proton" and "Proton VPN" are trademarks of Proton AG.</p>
+    <p>Built on <a href="https://www.wireguard.com/">WireGuard</a> (wireguard-android, Apache-2.0; wireguard-go, MIT). API behaviour follows Proton's open-source <a href="https://github.com/ProtonVPN/android-app">android-app</a>.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem("leanvpn-theme"); if (saved) root.setAttribute("data-theme", saved); } catch (e) {}
+  document.getElementById("theme").addEventListener("click", function () {
+    var dark = root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("leanvpn-theme", next); } catch (e) {}
+  });
+
+  document.querySelectorAll(".copy").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var text = b.previousElementSibling.textContent.replace(/^\$ /gm, "");
+      var done = function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1400); };
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () {});
+    });
+  });
+
+  var slider = document.getElementById("load"), out = document.getElementById("load-out");
+  function score(rtt, load) { return Math.round(rtt + 300 * Math.pow(load / 100, 2)); }
+  function update() {
+    var l = +slider.value, a = score(40, l), b = score(90, 30);
+    out.textContent = l + "%";
+    document.getElementById("score-a").textContent = a;
+    document.getElementById("score-b").textContent = b;
+    var bar = document.getElementById("bar-a");
+    bar.style.width = l + "%";
+    bar.className = l >= 70 ? "hot" : "";
+    var aWins = a < b;
+    document.getElementById("row-a").className = aWins ? "win" : "";
+    document.getElementById("row-b").className = aWins ? "" : "win";
+    document.getElementById("verdict").innerHTML = aWins
+      ? 'LeanVPN picks <b style="color:var(--accent-2)">Nearby</b>: at ' + l + "% load, being 50 ms closer still wins."
+      : 'LeanVPN picks <b style="color:var(--accent-2)">Farther</b>. It’s 50 ms slower on paper, but it won’t buckle.';
+  }
+  slider.addEventListener("input", update);
+  update();
+
+  // Quick Settings demo: off → connecting → connected → server fills up → switches → connected elsewhere.
+  document.getElementById("clock").textContent =
+    new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).replace(/\s?[AP]M$/, "");
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var tile = document.getElementById("lean"), sub = document.getElementById("lean-sub"),
+      key = document.getElementById("sb-key"), cap = document.getElementById("cap");
+  var frames = [
+    { on: false, s: "Off", c: "Tap the tile to connect. That's the whole app." },
+    { on: true, s: "NL-FREE#93…", c: "Measuring real latency to 16 servers at once." },
+    { on: true, s: "NL-FREE#93 · 54%", c: "Connected. The second line shows the server and its load." },
+    { on: true, s: "NL-FREE#93 · 88%", c: "15-minute check: the server has filled up to 88%." },
+    { on: true, s: "→ NL-FREE#41", c: "A server at least 20 points lighter exists, so it moves." },
+    { on: true, s: "NL-FREE#41 · 31%", c: "Back on a quiet server. You didn't touch anything." }
+  ];
+  var k = 2;
+  function show(f) {
+    tile.classList.toggle("on", f.on);
+    sub.textContent = f.s;
+    key.style.opacity = f.on ? 1 : 0;
+    cap.textContent = f.c;
+  }
+  setInterval(function () { k = (k + 1) % frames.length; show(frames[k]); }, 3000);
+})();
+</script>
+</body>
+</html>

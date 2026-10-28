@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No screens: a Quick Settings tile, an invisible helper activity for the system prompts,
+     and the VPN service. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.leanvpn">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:name=".App"
+        android:label="LeanVPN"
+        android:icon="@mipmap/ic"
+        android:allowBackup="false"
+        android:extractNativeLibs="false">
+
+        <!-- Opening the app only asks Android to add the tile; long-pressing the tile lands here too. -->
+        <activity
+            android:name=".Shim"
+            android:exported="true"
+            android:theme="@style/Shim"
+            android:excludeFromRecents="true"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".QuickTile"
+            android:exported="true"
+            android:label="LeanVPN"
+            android:icon="@drawable/tile"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <!-- Only woken when the VPN state changes or the tile is tapped. -->
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE" android:value="true" />
+            <meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE" android:value="true" />
+        </service>
+
+        <!-- Replaces WireGuard's own GoBackend$VpnService entry, so the app owns the service. -->
+        <service
+            android:name=".Service"
+            android:exported="false"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>
