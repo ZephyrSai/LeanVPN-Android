@@ -66,6 +66,15 @@ app does is left out, including the app itself: what remains is one tile in your
    the Play Store; choose **Install anyway**. The source is all here if you'd rather build it
    yourself.
 
+Every release is signed with the same key. Its certificate's SHA-256 fingerprint is
+
+```
+337d457a61be6e17dc516dcc523c86c06bcf313e286ba4683868f6ac125c4a67
+```
+
+and each release lists its APK's SHA-256, so you can check that what you downloaded is genuine
+(apps like AppVerifier do this on the phone).
+
 ### Or build it yourself
 
 See [Building from source](#building-from-source). It takes a minute, no Android Studio needed.
@@ -237,6 +246,9 @@ make install    # installs on a phone connected with USB debugging (adb)
 | `JAVA_HOME` | from `/usr/libexec/java_home`, else Homebrew's openjdk@21 | JDK 17 or newer |
 | `ABI` | `arm64-v8a` | `armeabi-v7a` for old 32-bit phones |
 | `KEYSTORE` / `KS_PASS` | `~/.android/leanvpn.keystore` / `android` | Signing key; created on first build |
+
+**Making a release:** bump `VERSION` and `CODE` in the Makefile, then `make release`. It writes
+`build/LeanVPN-<version>.apk` and prints the two fingerprints for the release notes.
 
 The build downloads WireGuard's Android library (`com.wireguard.android:tunnel`) from Maven Central
 and checks its SHA-256 before using it. The first build creates a signing key; **keep it**, because

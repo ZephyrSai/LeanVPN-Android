@@ -65,10 +65,16 @@ $(APK): $(OUT)/base.apk $(OUT)/classes.dex $(KEYSTORE)
 	$(BT)/apksigner sign --ks $(KEYSTORE) --ks-pass pass:$(KS_PASS) --ks-key-alias leanvpn --out $@ $(OUT)/aligned.apk
 	@ls -l $@ | awk '{print "APK:", $$5, "bytes"}'
 
+# Versioned copy for a GitHub release, with the fingerprints to publish alongside it.
+release: $(APK)
+	cp $(APK) $(OUT)/LeanVPN-$(VERSION).apk
+	@echo "APK SHA-256:         $$(shasum -a 256 $(OUT)/LeanVPN-$(VERSION).apk | cut -d' ' -f1)"
+	@echo "Signing cert SHA-256: $$($(BT)/apksigner verify --print-certs $(APK) | sed -n 's/.*SHA-256 digest: //p')"
+
 install: $(APK)
 	adb install -r $(APK)
 
 clean:
 	rm -rf $(OUT)
 
-.PHONY: all install clean
+.PHONY: all release install clean
